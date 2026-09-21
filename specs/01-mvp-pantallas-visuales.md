@@ -1,6 +1,6 @@
 # SPEC 01 — MVP de pantallas visuales de Arcade Vault
 
-**Estado:** Aprobado
+**Estado:** Implementado
 **Depende de:** —
 **Fecha:** 2026-09-17
 
