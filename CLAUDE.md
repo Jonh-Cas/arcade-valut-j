@@ -13,6 +13,10 @@ Development follows Spec Driven Design using the `/spec` and `/spec-impl` skills
 ## Skills
 Usa siempre /frontend-desing para diseñar la interfaz de usuario.
 
+## Playwright
+
+Graba todos los screenshots de Playwright en `.playwright/screenshots`.
+
 ## Stack notes
 
 - Next.js 16.3 App Router, React 19.2, TypeScript strict. Next 16 differs from older versions: check `node_modules/next/dist/docs/` (`01-app/`, `03-architecture/`, …) before using any Next API.
