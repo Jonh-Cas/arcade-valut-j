@@ -1,6 +1,6 @@
 # SPEC 02 — Página de Inicio y tab "Acerca de" desactivado
 
-**Estado:** Aprobado
+**Estado:** Implementado
 **Depende de:** SPEC 01
 **Fecha:** 2026-09-20
 
@@ -43,16 +43,16 @@ No se introducen estructuras de datos nuevas. La sección "Juegos disponibles ah
 
 ## Criterios de aceptación
 
-- [ ] `npm run build` compila sin errores de TypeScript ni de rutas.
-- [ ] `/` muestra la página de Inicio (hero, features, rail de juegos, stats, actividad en vivo, precios, CTA final) para cualquier visitante, sin lógica de "primera visita".
-- [ ] `/biblioteca` muestra el mismo contenido y comportamiento (buscador, filtro por categoría, grid) que antes tenía `/`.
-- [ ] La nav muestra los tabs en orden Inicio, Biblioteca, Salón de la Fama, Acerca de, tanto en desktop como en el panel móvil.
-- [ ] "Acerca de" se ve visualmente desactivado y no navega a ningún lado al hacer clic.
-- [ ] "Inicio" aparece activo solo en `/`; "Biblioteca" aparece activo en `/biblioteca` y en `/juego/[id]`; "Salón de la Fama" aparece activo en `/salon`.
-- [ ] Desde Inicio, los botones "EXPLORAR JUEGOS"/"VER TODOS LOS JUEGOS" navegan a `/biblioteca`; "CREAR CUENTA"/"EMPEZAR GRATIS" navegan a `/auth`; "VER SALÓN" navega a `/salon`; las `MiniCard` del rail navegan a `/juego/[id]`.
-- [ ] Los botones "VOLVER AL VAULT" (detalle de juego, reproductor) y el botón inferior de Salón navegan a `/biblioteca`.
-- [ ] Iniciar sesión o continuar como invitado en `/auth` redirige a `/biblioteca`.
-- [ ] El diseño visual de Inicio (siluetas flotantes, tipografía pixel/neón, CRT/scanlines de fondo) se ve equivalente a `home.jsx` + `references/templates/home-about/styles.css` en escritorio y en móvil (<840px).
+- [x] `npm run build` compila sin errores de TypeScript ni de rutas.
+- [x] `/` muestra la página de Inicio (hero, features, rail de juegos, stats, actividad en vivo, precios, CTA final) para cualquier visitante, sin lógica de "primera visita".
+- [x] `/biblioteca` muestra el mismo contenido y comportamiento (buscador, filtro por categoría, grid) que antes tenía `/`.
+- [x] La nav muestra los tabs en orden Inicio, Biblioteca, Salón de la Fama, Acerca de, tanto en desktop como en el panel móvil.
+- [x] "Acerca de" se ve visualmente desactivado y no navega a ningún lado al hacer clic.
+- [x] "Inicio" aparece activo solo en `/`; "Biblioteca" aparece activo en `/biblioteca` y en `/juego/[id]`; "Salón de la Fama" aparece activo en `/salon`.
+- [x] Desde Inicio, los botones "EXPLORAR JUEGOS"/"VER TODOS LOS JUEGOS" navegan a `/biblioteca`; "CREAR CUENTA"/"EMPEZAR GRATIS" navegan a `/auth`; "VER SALÓN" navega a `/salon`; las `MiniCard` del rail navegan a `/juego/[id]`.
+- [x] Los botones "VOLVER AL VAULT" (detalle de juego, reproductor) y el botón inferior de Salón navegan a `/biblioteca`.
+- [x] Iniciar sesión o continuar como invitado en `/auth` redirige a `/biblioteca`.
+- [x] El diseño visual de Inicio (siluetas flotantes, tipografía pixel/neón, CRT/scanlines de fondo) se ve equivalente a `home.jsx` + `references/templates/home-about/styles.css` en escritorio y en móvil (<840px).
 
 ## Decisiones tomadas
 
