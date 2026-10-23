@@ -3,21 +3,30 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { clearStoredUser, getStoredUser, type StoredUser } from "@/lib/storage";
+import type { User } from "@supabase/supabase-js";
+import { createClient, getDisplayName } from "@/lib/supabase/client";
 
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<StoredUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setUser(getStoredUser());
-  }, [pathname]);
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
 
-  const isActive = (name: "inicio" | "biblioteca" | "salon" | "about" | "auth") => {
+  const isActive = (
+    name: "inicio" | "biblioteca" | "salon" | "about" | "auth",
+  ) => {
     if (name === "inicio") return pathname === "/";
-    if (name === "biblioteca") return pathname === "/biblioteca" || pathname.startsWith("/juego");
+    if (name === "biblioteca")
+      return pathname === "/biblioteca" || pathname.startsWith("/juego");
     if (name === "salon") return pathname === "/salon";
     if (name === "about") return pathname === "/acerca-de";
     return pathname === "/auth";
@@ -25,10 +34,11 @@ export function Nav() {
 
   const close = () => setOpen(false);
 
-  const handleSignOut = () => {
-    clearStoredUser();
+  const handleSignOut = async () => {
+    await createClient().auth.signOut();
     setUser(null);
     router.push("/");
+    router.refresh();
   };
 
   return (
@@ -44,7 +54,10 @@ export function Nav() {
           <Link href="/" className={isActive("inicio") ? "active" : ""}>
             Inicio
           </Link>
-          <Link href="/biblioteca" className={isActive("biblioteca") ? "active" : ""}>
+          <Link
+            href="/biblioteca"
+            className={isActive("biblioteca") ? "active" : ""}
+          >
             Biblioteca
           </Link>
           <Link href="/salon" className={isActive("salon") ? "active" : ""}>
@@ -61,40 +74,77 @@ export function Nav() {
         </div>
         {user ? (
           <button className="btn ghost auth-btn" onClick={handleSignOut}>
-            {user.name} ▾
+            {getDisplayName(user)} ▾
           </button>
         ) : (
           <Link href="/auth" className="btn auth-btn">
             Iniciar Sesión
           </Link>
         )}
-        <button className="btn ghost hamburger" onClick={() => setOpen(true)} aria-label="Menú">
+        <button
+          className="btn ghost hamburger"
+          onClick={() => setOpen(true)}
+          aria-label="Menú"
+        >
           ≡
         </button>
       </nav>
 
-      <div className={"av-mobile-backdrop" + (open ? " open" : "")} onClick={close}></div>
+      <div
+        className={"av-mobile-backdrop" + (open ? " open" : "")}
+        onClick={close}
+      ></div>
       <aside className={"av-mobile-panel" + (open ? " open" : "")}>
-        <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
+        <div
+          className="pixel neon-cyan"
+          style={{ fontSize: 11, marginBottom: 16 }}
+        >
           MENÚ
         </div>
-        <Link href="/" className={isActive("inicio") ? "active" : ""} onClick={close}>
+        <Link
+          href="/"
+          className={isActive("inicio") ? "active" : ""}
+          onClick={close}
+        >
           Inicio
         </Link>
-        <Link href="/biblioteca" className={isActive("biblioteca") ? "active" : ""} onClick={close}>
+        <Link
+          href="/biblioteca"
+          className={isActive("biblioteca") ? "active" : ""}
+          onClick={close}
+        >
           Biblioteca
         </Link>
-        <Link href="/salon" className={isActive("salon") ? "active" : ""} onClick={close}>
+        <Link
+          href="/salon"
+          className={isActive("salon") ? "active" : ""}
+          onClick={close}
+        >
           Salón de la Fama
         </Link>
-        <Link href="/acerca-de" className={isActive("about") ? "active" : ""} onClick={close}>
+        <Link
+          href="/acerca-de"
+          className={isActive("about") ? "active" : ""}
+          onClick={close}
+        >
           Acerca de
         </Link>
-        <Link href="/auth" className={isActive("auth") ? "active" : ""} onClick={close}>
+        <Link
+          href="/auth"
+          className={isActive("auth") ? "active" : ""}
+          onClick={close}
+        >
           {user ? "Cuenta" : "Iniciar Sesión"}
         </Link>
         <div style={{ flex: 1 }}></div>
-        <div className="pixel" style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}>
+        <div
+          className="pixel"
+          style={{
+            fontSize: 9,
+            color: "var(--ink-faint)",
+            letterSpacing: "0.16em",
+          }}
+        >
           CRÉDITOS · 03
         </div>
       </aside>
