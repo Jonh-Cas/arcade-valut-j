@@ -14,7 +14,6 @@ export default function GamePlayerPage() {
 
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
-  const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   // null = guest (no Supabase session).
@@ -44,17 +43,15 @@ export default function GamePlayerPage() {
     return () => clearInterval(t);
   }, [game, over, paused]);
 
-  useEffect(() => {
-    if (score > 0 && score % 2500 < 100) setLevel((l) => l + 1);
-  }, [score]);
-
   if (!game) return null;
+
+  // One level every 2500 points, derived from the score instead of synced in an effect.
+  const level = 1 + Math.floor(score / 2500);
 
   const endGame = () => setOver(true);
   const restart = () => {
     setScore(0);
     setLives(3);
-    setLevel(1);
     setPaused(false);
     setOver(false);
     setSaved(false);

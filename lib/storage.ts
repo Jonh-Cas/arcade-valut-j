@@ -1,8 +1,4 @@
-// ===== lib/storage.ts — localStorage-backed mock persistence =====
-
-export interface StoredUser {
-  name: string;
-}
+// ===== lib/storage.ts — localStorage-backed mock persistence for scores =====
 
 export interface StoredScoreEntry {
   game: string;
@@ -11,24 +7,7 @@ export interface StoredScoreEntry {
   at: number;
 }
 
-const USER_KEY = "av_user";
 const SCORES_KEY = "av_scores";
-
-export function getStoredUser(): StoredUser | null {
-  try {
-    return JSON.parse(localStorage.getItem(USER_KEY) ?? "null");
-  } catch {
-    return null;
-  }
-}
-
-export function setStoredUser(user: StoredUser): void {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-}
-
-export function clearStoredUser(): void {
-  localStorage.removeItem(USER_KEY);
-}
 
 export function getStoredScores(): StoredScoreEntry[] {
   try {
