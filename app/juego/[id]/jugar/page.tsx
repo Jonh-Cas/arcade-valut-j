@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { GAMES } from "@/lib/data";
-import { addStoredScore, getStoredUser } from "@/lib/storage";
+import { addStoredScore } from "@/lib/storage";
+import { createClient, getDisplayName } from "@/lib/supabase/client";
 
 export default function GamePlayerPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,12 +17,16 @@ export default function GamePlayerPage() {
   const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
-  const [name, setName] = useState("INVITADO");
+  // null = guest (no Supabase session).
+  const [username, setUsername] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const user = getStoredUser();
-    if (user) setName(user.name);
+    createClient()
+      .auth.getUser()
+      .then(({ data }) =>
+        setUsername(data.user ? getDisplayName(data.user) : null),
+      );
   }, []);
 
   useEffect(() => {
@@ -31,7 +37,10 @@ export default function GamePlayerPage() {
 
   useEffect(() => {
     if (!game || over || paused) return;
-    const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
+    const t = setInterval(
+      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
+      220,
+    );
     return () => clearInterval(t);
   }, [game, over, paused]);
 
@@ -52,7 +61,8 @@ export default function GamePlayerPage() {
   };
 
   const handleSaveScore = () => {
-    addStoredScore({ game: game.id, score, name });
+    if (!username) return;
+    addStoredScore({ game: game.id, score, name: username });
     setSaved(true);
   };
 
@@ -63,7 +73,7 @@ export default function GamePlayerPage() {
           <div className="hud-stat">
             <div className="l">Jugador</div>
             <div className="v" style={{ color: "var(--ink)" }}>
-              {name}
+              {username ?? "INVITADO"}
             </div>
           </div>
           <div className="hud-stat">
@@ -86,7 +96,10 @@ export default function GamePlayerPage() {
           <button className="btn magenta" onClick={endGame}>
             FIN
           </button>
-          <button className="btn ghost" onClick={() => router.push(`/juego/${game.id}`)}>
+          <button
+            className="btn ghost"
+            onClick={() => router.push(`/juego/${game.id}`)}
+          >
             SALIR
           </button>
         </div>
@@ -102,14 +115,22 @@ export default function GamePlayerPage() {
             <div className="player-ship"></div>
           </div>
           {paused && (
-            <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
+            <div
+              className="crt-content"
+              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+            >
               <div>
                 <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
                   EN PAUSA
                 </div>
                 <div
                   className="mono"
-                  style={{ fontSize: 11, color: "var(--ink-dim)", marginTop: 10, letterSpacing: "0.16em" }}
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ink-dim)",
+                    marginTop: 10,
+                    letterSpacing: "0.16em",
+                  }}
                 >
                   PULSA REANUDAR PARA CONTINUAR
                 </div>
@@ -119,9 +140,7 @@ export default function GamePlayerPage() {
         </div>
         <div className="crt-bottom">
           <span className="led">SEÑAL OK</span>
-          <span>
-            {game.title} · CRT-83 · 60 HZ
-          </span>
+          <span>{game.title} · CRT-83 · 60 HZ</span>
           <span>CARGA · 1MB</span>
         </div>
       </div>
@@ -132,13 +151,19 @@ export default function GamePlayerPage() {
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
-            {!saved ? (
+            {!username ? (
               <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase().slice(0, 10))}
-                  placeholder="TUS INICIALES"
-                />
+                <Link
+                  href="/auth"
+                  className="btn yellow"
+                  style={{ width: "100%" }}
+                >
+                  INICIA SESIÓN PARA GUARDAR
+                </Link>
+              </div>
+            ) : !saved ? (
+              <div className="input-row">
+                <input value={username} readOnly aria-label="Jugador" />
                 <button className="btn yellow" onClick={handleSaveScore}>
                   GUARDAR PUNTUACIÓN
                 </button>
@@ -150,7 +175,10 @@ export default function GamePlayerPage() {
               <button className="btn" onClick={restart}>
                 JUGAR DE NUEVO
               </button>
-              <button className="btn magenta" onClick={() => router.push("/biblioteca")}>
+              <button
+                className="btn magenta"
+                onClick={() => router.push("/biblioteca")}
+              >
                 VOLVER AL VAULT
               </button>
             </div>
