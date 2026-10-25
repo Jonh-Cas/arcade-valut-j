@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { AsteroidsCanvas } from "@/components/games/asteroids-canvas";
 import { GAMES } from "@/lib/data";
 import { addStoredScore } from "@/lib/storage";
 import { createClient, getDisplayName } from "@/lib/supabase/client";
@@ -11,11 +12,16 @@ export default function GamePlayerPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const game = GAMES.find((g) => g.id === id);
+  // Asteroids es el único juego real: HUD alimentado por el motor.
+  const isAsteroids = game?.id === "asteroids";
 
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
+  const [engineLevel, setEngineLevel] = useState(1);
+  // Cambiarla remonta <AsteroidsCanvas> con un motor nuevo.
+  const [runId, setRunId] = useState(0);
   // null = guest (no Supabase session).
   const [username, setUsername] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -35,23 +41,25 @@ export default function GamePlayerPage() {
   }, [game, router]);
 
   useEffect(() => {
-    if (!game || over || paused) return;
+    if (!game || isAsteroids || over || paused) return;
     const t = setInterval(
       () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
       220,
     );
     return () => clearInterval(t);
-  }, [game, over, paused]);
+  }, [game, isAsteroids, over, paused]);
 
   if (!game) return null;
 
   // One level every 2500 points, derived from the score instead of synced in an effect.
-  const level = 1 + Math.floor(score / 2500);
+  const level = isAsteroids ? engineLevel : 1 + Math.floor(score / 2500);
 
   const endGame = () => setOver(true);
   const restart = () => {
     setScore(0);
     setLives(3);
+    setEngineLevel(1);
+    setRunId((r) => r + 1);
     setPaused(false);
     setOver(false);
     setSaved(false);
@@ -104,13 +112,28 @@ export default function GamePlayerPage() {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {isAsteroids ? (
+            <AsteroidsCanvas
+              key={runId}
+              paused={paused}
+              over={over}
+              onScore={setScore}
+              onLives={setLives}
+              onLevel={setEngineLevel}
+              onGameOver={(finalScore) => {
+                setScore(finalScore);
+                setOver(true);
+              }}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
           {paused && (
             <div
               className="crt-content"
