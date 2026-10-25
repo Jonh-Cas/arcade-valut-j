@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { AsteroidsCanvas } from "@/components/games/asteroids-canvas";
@@ -22,6 +22,7 @@ export default function GamePlayerPage() {
   const [engineLevel, setEngineLevel] = useState(1);
   // Cambiarla remonta <AsteroidsCanvas> con un motor nuevo.
   const [runId, setRunId] = useState(0);
+  const togglePause = useCallback(() => setPaused((p) => !p), []);
   // null = guest (no Supabase session).
   const [username, setUsername] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -95,7 +96,7 @@ export default function GamePlayerPage() {
           </div>
         </div>
         <div className="hud-actions">
-          <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
+          <button className="btn yellow" onClick={togglePause}>
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
           <button className="btn magenta" onClick={endGame}>
@@ -117,6 +118,7 @@ export default function GamePlayerPage() {
               key={runId}
               paused={paused}
               over={over}
+              onTogglePause={togglePause}
               onScore={setScore}
               onLives={setLives}
               onLevel={setEngineLevel}

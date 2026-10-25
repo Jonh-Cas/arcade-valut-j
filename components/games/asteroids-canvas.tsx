@@ -10,10 +10,19 @@ import {
 type Props = AsteroidsCallbacks & {
   paused: boolean;
   over: boolean;
+  onTogglePause: () => void;
 };
 
+const GAME_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "Space"]);
+const PAUSE_KEYS = new Set(["KeyP", "Escape"]);
+
 // Reinicio: el reproductor cambia la `key` y el componente se remonta con un motor nuevo.
-export function AsteroidsCanvas({ paused, over, ...callbacks }: Props) {
+export function AsteroidsCanvas({
+  paused,
+  over,
+  onTogglePause,
+  ...callbacks
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameRef = useRef<AsteroidsGame | null>(null);
   // Callbacks en ref para no recrear el motor cuando cambia su identidad.
@@ -45,6 +54,20 @@ export function AsteroidsCanvas({ paused, over, ...callbacks }: Props) {
     if (paused || over) game.pause();
     else game.resume();
   }, [paused, over]);
+
+  // Con el modal abierto no se toca el teclado: Space y Escape quedan para sus botones.
+  useEffect(() => {
+    if (over) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (GAME_KEYS.has(e.code)) e.preventDefault();
+      if (PAUSE_KEYS.has(e.code) && !e.repeat) {
+        e.preventDefault();
+        onTogglePause();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [over, onTogglePause]);
 
   return (
     <canvas

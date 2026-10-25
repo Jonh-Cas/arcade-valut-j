@@ -417,6 +417,8 @@ export function createAsteroidsGame(
   const justPressed: Keys = {};
 
   const onKeyDown = (e: KeyboardEvent) => {
+    // En pausa o con el modal de fin abierto, las teclas de juego se ignoran.
+    if (state === "paused" || state === "gameover") return;
     if (!keys[e.code]) justPressed[e.code] = true;
     keys[e.code] = true;
   };
