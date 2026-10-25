@@ -1,6 +1,6 @@
 # SPEC 05 — Juego Asteroids jugable
 
-**Estado:**
+**Estado:** Aprobado
 **Depende de:** SPEC 01, SPEC 04
 **Fecha:** 2026-10-25
 
